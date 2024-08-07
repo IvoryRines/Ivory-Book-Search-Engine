@@ -110,7 +110,7 @@ const SearchBooks = () => {
       </div>
 
       <Container>
-        <h2 className="pt-5">
+        <h2 className="py-5">
           {searchedBooks.length
             ? `Viewing ${searchedBooks.length} results:`
             : "Search for a book to begin"}
@@ -118,7 +118,7 @@ const SearchBooks = () => {
         <Row>
           {searchedBooks.map((book) => {
             return (
-              <Col md="4" key={book.bookId}>
+              <Col md="4 py-3" key={book.bookId}>
                 <Card border="dark">
                   {book.image ? (
                     <Card.Img
@@ -130,7 +130,9 @@ const SearchBooks = () => {
                   <Card.Body>
                     <Card.Title>{book.title}</Card.Title>
                     <p className="small">Authors: {book.authors}</p>
-                    <Card.Text>{book.description}</Card.Text>
+                    <Card.Text className="scrollable-box">
+                      {book.description}
+                    </Card.Text>
                     {Auth.loggedIn() && (
                       <Button
                         disabled={savedBookIds?.some(
