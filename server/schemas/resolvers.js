@@ -1,5 +1,5 @@
+const { signToken, AuthenticationError } = require("../utils/auth");
 const { User } = require("../models");
-const { signToken, AuthentificationError } = require("../utils/auth");
 
 const resolvers = {
   Query: {
@@ -30,20 +30,24 @@ const resolvers = {
     },
 
     addUser: async (parent, { username, email, password }) => {
-      const user = await User.create({ username, email, password });
-      const token = signToken(user);
+      try {
+        const user = await User.create({ username, email, password });
+        const token = signToken(user);
 
-      return { token, user };
+        return { token, user };
+      } catch (error) {
+        console.error(error);
+      }
     },
 
-    saveBook: async (parent, { SaveBookInput }, context) => {
+    saveBook: async (parent, { saveBookInput }, context) => {
       if (context.user) {
         try {
           const updatedUser = await User.findOneAndUpdate(
             { _id: context.user._id },
             {
-              $push: {
-                savedBooks: SaveBookInput,
+              $addToSet: {
+                savedBooks: saveBookInput,
               },
             },
             { new: true, runValidators: true }
@@ -56,7 +60,7 @@ const resolvers = {
         }
       }
 
-      throw new AuthentificationError("Not authenticated");
+      throw new AuthenticationError("Not authenticated");
     },
 
     removeBook: async (parent, { bookId }, context) => {
@@ -66,9 +70,7 @@ const resolvers = {
             { _id: context.user._id },
             {
               $pull: {
-                savedBooks: {
-                  bookId: bookId,
-                },
+                savedBooks: { bookId },
               },
             },
             { new: true }
@@ -76,10 +78,11 @@ const resolvers = {
           return updatedUser;
         } catch (error) {
           console.log(err);
-          throw new Error("Failed to save book");
+          throw new Error("Failed to remove book");
         }
-        throw new AuthentificationError();
       }
+
+      throw new AuthenticationError();
     },
   },
 };
